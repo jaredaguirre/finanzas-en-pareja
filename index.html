@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finanzas en pareja</title>
+<meta name="description" content="Cinco simuladores simples para pensar las finanzas en pareja.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf6ef;
+    --card: #ffffff;
+    --ink: #1f2a26;
+    --muted: #5d6a64;
+    --line: #e4ddd0;
+    --accent: #1f6f5c;
+    --accent-soft: #e3f1ec;
+    --warm: #c8642c;
+    --warm-soft: #fbeee4;
+    --bad: #b3261e;
+    --bad-soft: #fbe9e7;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 17px/1.5 "DM Sans", system-ui, -apple-system, sans-serif;
+  }
+  main { max-width: 680px; margin: 0 auto; padding: 20px 16px 64px; }
+  h1, h2 { font-family: Fraunces, Georgia, serif; line-height: 1.2; margin: 0; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.6rem; }
+  h3 { font-size: 1.05rem; margin: 0 0 6px; }
+  p { margin: 0 0 10px; }
+  a { color: var(--accent); }
+
+  /* Portada */
+  .intro { margin: 12px 0 24px; color: var(--muted); }
+  .menu { display: grid; gap: 12px; }
+  .menu a {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px;
+  }
+  .menu a:hover { border-color: var(--accent); }
+  .menu b { display: block; font-family: Fraunces, Georgia, serif; font-size: 1.15rem; }
+  .menu span { color: var(--muted); font-size: .95rem; }
+
+  /* Calculadoras */
+  .calc { display: none; }
+  .calc.activa { display: block; }
+  body.con-calc #portada { display: none; }
+  .volver { display: inline-block; margin-bottom: 14px; font-size: .95rem; }
+  .tag {
+    display: inline-block; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px;
+  }
+  .bloque {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px; margin-top: 16px;
+  }
+  .ejemplo { background: var(--warm-soft); border-color: #f0d6c3; }
+  .ejemplo h3 { color: var(--warm); }
+  .botones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  button {
+    font: inherit; font-weight: 500; cursor: pointer; border-radius: 10px; padding: 10px 14px;
+    border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  }
+  button.sec { background: transparent; color: var(--accent); }
+  button.chico { padding: 4px 10px; font-size: .9rem; border-color: var(--line); background: transparent; color: var(--muted); }
+
+  .campo { margin-bottom: 14px; }
+  .campo label, .campo .label { display: block; font-weight: 500; margin-bottom: 4px; }
+  .ayuda { display: block; font-size: .88rem; color: var(--muted); margin-top: 3px; }
+  input[type=text], select {
+    width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: #fff; color: var(--ink);
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .pesos { position: relative; }
+  .pesos::before { content: "$"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .pesos input { padding-left: 26px; }
+  .pct { position: relative; }
+  .pct::after { content: "%"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  @media (max-width: 420px) { .grilla { grid-template-columns: 1fr; } }
+  .grupo-titulo { font-weight: 700; margin: 18px 0 8px; color: var(--accent); }
+  .grupo-titulo:first-child { margin-top: 0; }
+
+  .deuda { border: 1px dashed var(--line); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+  .deuda-cab { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 700; }
+  .fila-recorte { display: grid; grid-template-columns: 1.3fr 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+
+  .opciones label { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; margin-bottom: 6px; }
+  .opciones input { margin-top: 5px; }
+  .check { display: flex; gap: 8px; align-items: flex-start; }
+  .check input { margin-top: 5px; }
+
+  /* Resultados */
+  .resultado { background: var(--accent-soft); border-color: #c5e2d8; }
+  .resultado h3 { color: var(--accent); }
+  .grande { font-family: Fraunces, Georgia, serif; font-size: 1.7rem; line-height: 1.2; margin: 4px 0 10px; }
+  .vacio { color: var(--muted); margin: 0; }
+  .alerta { background: var(--bad-soft); color: var(--bad); border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+  .nota { font-size: .88rem; color: var(--muted); margin-top: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; margin-top: 8px; }
+  th, td { text-align: right; padding: 6px 4px; border-bottom: 1px solid #c5e2d8; font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 500; color: var(--muted); }
+  .dato { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid #c5e2d8; }
+  .dato:last-child { border-bottom: 0; }
+  .dato b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .comparar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .comparar > div { background: #fff; border-radius: 10px; padding: 10px; }
+  .comparar .t { font-size: .85rem; color: var(--muted); }
+  .comparar .v { font-weight: 700; }
+  ol.orden { margin: 6px 0 0; padding-left: 22px; }
+  footer { margin-top: 32px; font-size: .85rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- ========== PORTADA ========== -->
+  <section id="portada">
+    <h1>Finanzas en pareja</h1>
+    <p class="intro">Cinco simuladores para hacer en pareja. Elijan el ejercicio que les tocó, lean el caso de ejemplo y después prueben con sus propios números. Nada de lo que escriban se guarda ni se envía a ningún lado.</p>
+    <nav class="menu">
+      <a href="#deudas"><b>1. ¿Cuándo podemos quedar libres de deudas?</b><span>Un plan para cancelar varias deudas, una por una.</span></a>
+      <a href="#emergencias"><b>2. ¿Cuánto deberíamos tener guardado para imprevistos?</b><span>El fondo de emergencia y cuánto ahorrar por mes para armarlo.</span></a>
+      <a href="#presupuesto"><b>3. ¿A dónde se va nuestra plata?</b><span>Ingresos, gastos y qué parte se lleva cada cosa.</span></a>
+      <a href="#recortes"><b>4. ¿Hace diferencia gastar un poco menos?</b><span>Cuánto suman los pequeños recortes con los años.</span></a>
+      <a href="#tarjeta"><b>5. ¿Cuánto tardamos en pagar la tarjeta?</b><span>Pagar solo el mínimo vs. pagar un poco más.</span></a>
+    </nav>
+  </section>
+
+  <!-- ========== 1. DEUDAS ========== -->
+  <section class="calc" id="deudas">
+    <a class="volver" href="#">← Ver todos los ejercicios</a><br>
+    <span class="tag">Ejercicio 1</span>
+    <h2>¿Cuándo podemos quedar libres de deudas?</h2>
+
+    <div class="bloque">
+      <h3>¿Qué hace esta calculadora?</h3>
+      <p>Arma un plan para cancelar todas sus deudas. Siguen pagando la cuota de cada una, pero toda la plata extra va a <b>una sola deuda por vez</b>. Cuando la terminan, lo que pagaban por ella se suma a la siguiente. Así cada deuda se cancela más rápido que la anterior (por eso se le dice "bola de nieve").</p>
+      <p>Pueden elegir qué deuda atacar primero: la <b>más chica</b> (se ven resultados rápido y motiva) o la de <b>tasa más alta</b> (se pagan menos intereses).</p>
+    </div>
+
+    <div class="bloque ejemplo">
+      <h3>Para practicar: el caso de Pedro y María</h3>
+      <p>Pedro y María tienen tres deudas:</p>
+      <ul>
+        <li><b>Tarjeta de crédito:</b> deben $850.000, pagan $60.000 por mes y la tasa anual (TNA) es 75%.</li>
+        <li><b>Préstamo personal:</b> les quedan $1.200.000, la cuota es de $95.000 y la TNA es 60%.</li>
+        <li><b>Heladera en cuotas sin interés:</b> faltan $360.000, en cuotas de $30.000 (tasa 0%).</li>
+      </ul>
+      <p>Revisando gastos, pueden sumar <b>$40.000 extra por mes</b>, y en <b>diciembre</b> van a poner <b>$300.000 del aguinaldo</b>.</p>
+      <p><b>Cómo completarlo:</b> carguen cada deuda en su recuadro (cuánto deben, la cuota y la tasa), después el extra mensual y el aguinaldo con su mes. Por último, prueben los dos métodos y comparen: ¿cuál les conviene?</p>
+      <div class="botones"><button type="button" data-ejemplo="deudas">Cargar el ejemplo</button><button type="button" class="sec" data-borrar="deudas">Borrar todo</button></div>
+    </div>
+
+    <form class="bloque" autocomplete="off" onsubmit="return false">
+      <div class="grupo-titulo">Sus deudas</div>
+      <div class="lista-deudas"></div>
+      <button type="button" class="sec agregar-deuda">+ Agregar otra deuda</button>
+
+      <div class="grupo-titulo">Plata extra para las deudas</div>
+      <div class="campo">
+        <label for="d-extra">¿Cuánto más pueden pagar por mes?</label>
+        <div class="pesos"><input type="text" id="d-extra" name="extra" data-tipo="pesos" inputmode="numeric" placeholder="0"></div>
+        <span class="ayuda">Además de las cuotas. Si no pueden sumar nada, déjenlo vacío.</span>
+      </div>
+      <div class="grilla">
+        <div class="campo">
+          <label for="d-unico">Pago único (ej. aguinaldo)</label>
+          <div class="pesos"><input type="text" id="d-unico" name="unico" data-tipo="pesos" inputmode="numeric" placeholder="0"></div>
+        </div>
+        <div class="campo">
+          <label for="d-mes">¿En qué mes?</label>
+          <select id="d-mes" name="mesUnico"></select>
+        </div>
+      </div>
+
+      <div class="grupo-titulo">¿Qué deuda atacan primero?</div>
+      <div class="opciones">
+        <label><input type="radio" name="orden" value="saldo" checked> <span><b>La más chica primero</b> (bola de nieve): se cancelan deudas rápido y da ánimo.</span></label>
+        <label><input type="radio" name="orden" value="tasa"> <span><b>La de tasa más alta primero</b> (avalancha): se pagan menos intereses.</span></label>
+      </div>
+    </form>
+
+    <div class="bloque resultado" aria-live="polite"></div>
+  </section>
+
+  <!-- ========== 2. FONDO DE EMERGENCIA ========== -->
+  <section class="calc" id="emergencias">
+    <a class="volver" href="#">← Ver todos los ejercicios</a><br>
+    <span class="tag">Ejercicio 2</span>
+    <h2>¿Cuánto deberíamos tener guardado para imprevistos?</h2>
+
+    <div class="bloque">
+      <h3>¿Qué hace esta calculadora?</h3>
+      <p>Un <b>fondo de emergencia</b> es plata guardada solo para imprevistos: quedarse sin trabajo, un problema de salud, un arreglo urgente. Lo recomendable es que alcance para cubrir <b>entre 3 y 6 meses de gastos básicos</b>.</p>
+      <p>La calculadora suma sus gastos imprescindibles, les dice cuánto debería tener el fondo y cuánto tienen que ahorrar por mes para completarlo en el plazo que elijan.</p>
+    </div>
+
+    <div class="bloque ejemplo">
+      <h3>Para practicar: el caso de Lucas y Sofía</h3>
+      <p>Lucas y Sofía alquilan. Por mes gastan <b>$550.000</b> de alquiler y expensas, <b>$120.000</b> en servicios, <b>$480.000</b> en supermercado, <b>$150.000</b> en transporte, <b>$180.000</b> de prepaga y <b>$90.000</b> de cuotas. Entre los dos ganan <b>$2.400.000</b> por mes.</p>
+      <p>Tienen <b>$400.000</b> ahorrados y quieren armar un fondo para <b>3 meses</b>, completándolo en <b>12 meses</b>. Lo van a guardar en un fondo que más o menos le empata a la inflación (rendimiento: 0%).</p>
+      <p><b>Cómo completarlo:</b> pongan cada gasto en su categoría, después los ingresos, lo que ya tienen ahorrado, cuántos meses quieren cubrir y en cuánto tiempo quieren juntarlo.</p>
+      <div class="botones"><button type="button" data-ejemplo="emergencias">Cargar el ejemplo</button><button type="button" class="sec" data-borrar="emergencias">Borrar todo</button></div>
+    </div>
+
+    <form class="bloque" autocomplete="off" onsubmit="return false">
+      <div class="grupo-titulo">Gastos imprescindibles por mes</div>
+      <p class="ayuda" style="margin:-4px 0 10px">Solo lo que no podrían dejar de pagar aunque se quedaran sin ingresos.</p>
+      <div class="grilla">
+        <div class="campo"><label for="e-viv">Alquiler / hipoteca y expensas</label><div class="pesos"><input type="text" id="e-viv" name="vivienda" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="e-serv">Servicios (luz, gas, agua, internet, celular)</label><div class="pesos"><input type="text" id="e-serv" name="servicios" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="e-super">Supermercado y comida</label><div class="pesos"><input type="text" id="e-super" name="super" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="e-trans">Transporte (SUBE, nafta)</label><div class="pesos"><input type="text" id="e-trans" name="transporte" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="e-salud">Salud (prepaga, remedios)</label><div class="pesos"><input type="text" id="e-salud" name="salud" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="e-cuotas">Cuotas y deudas</label><div class="pesos"><input type="text" id="e-cuotas" name="cuotas" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="e-edu">Educación e hijos</label><div class="pesos"><input type="text" id="e-edu" name="educacion" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="e-otros">Otros imprescindibles</label><div class="pesos"><input type="text" id="e-otros" name="otros" data-tipo="pesos" inputmode="numeric"></div></div>
+      </div>
+
+      <div class="grupo-titulo">Su situación</div>
+      <div class="grilla">
+        <div class="campo"><label for="e-ing">Ingresos del hogar por mes</label><div class="pesos"><input type="text" id="e-ing" name="ingresos" data-tipo="pesos" inputmode="numeric"></div><span class="ayuda">Lo que cobran entre los dos, en mano.</span></div>
+        <div class="campo"><label for="e-ahorro">¿Cuánto tienen ya guardado?</label><div class="pesos"><input type="text" id="e-ahorro" name="ahorro" data-tipo="pesos" inputmode="numeric"></div><span class="ayuda">Solo lo que usarían para una emergencia.</span></div>
+        <div class="campo">
+          <label for="e-cob">¿Cuántos meses quieren cubrir?</label>
+          <select id="e-cob" name="cobertura">
+            <option value="3" selected>3 meses</option><option value="4">4 meses</option><option value="5">5 meses</option>
+            <option value="6">6 meses</option><option value="9">9 meses</option><option value="12">12 meses</option>
+          </select>
+          <span class="ayuda">Si los ingresos son variables (monotributo, comisiones, changas), apunten a 6 o más.</span>
+        </div>
+        <div class="campo"><label for="e-plazo">¿En cuántos meses lo quieren juntar?</label><input type="text" id="e-plazo" name="plazo" data-tipo="numero" inputmode="numeric" placeholder="12"></div>
+      </div>
+      <div class="campo">
+        <label for="e-rend">Rendimiento anual por encima de la inflación</label>
+        <div class="pct"><input type="text" id="e-rend" name="rend" data-tipo="numero" inputmode="decimal" placeholder="0"></div>
+        <span class="ayuda">Cuánto gana el ahorro <b>además</b> de la inflación. Si no saben, dejen 0: los números quedan en "pesos de hoy".</span>
+      </div>
+    </form>
+
+    <div class="bloque resultado" aria-live="polite"></div>
+  </section>
+
+  <!-- ========== 3. PRESUPUESTO ========== -->
+  <section class="calc" id="presupuesto">
+    <a class="volver" href="#">← Ver todos los ejercicios</a><br>
+    <span class="tag">Ejercicio 3</span>
+    <h2>¿A dónde se va nuestra plata?</h2>
+
+    <div class="bloque">
+      <h3>¿Qué hace esta calculadora?</h3>
+      <p>Arma el <b>presupuesto del hogar</b>: suma lo que entra, lo que sale, y les muestra si les sobra o les falta y qué parte del sueldo se lleva cada cosa.</p>
+      <p>También compara con la regla <b>50/30/20</b>, una referencia simple: 50% para <b>necesidades</b>, 30% para <b>gustos</b> y 20% para <b>ahorro y deudas</b>. No es una ley; sirve para ver dónde están parados.</p>
+    </div>
+
+    <div class="bloque ejemplo">
+      <h3>Para practicar: el caso de Martín y Carla</h3>
+      <p>Martín cobra <b>$1.400.000</b> y Carla <b>$1.100.000</b> por mes. Gastan <b>$600.000</b> en alquiler y expensas, <b>$130.000</b> en servicios, <b>$520.000</b> en supermercado, <b>$140.000</b> en transporte, <b>$200.000</b> de prepaga, <b>$250.000</b> en salidas y delivery, <b>$60.000</b> en suscripciones, <b>$120.000</b> en ropa y <b>$150.000</b> en cuotas de la tarjeta.</p>
+      <p>Sienten que a fin de mes nunca les sobra nada, pero nunca hicieron la cuenta.</p>
+      <p><b>Cómo completarlo:</b> pongan los ingresos de cada uno arriba, y después cada gasto en la categoría que corresponda. Lo que no usen, déjenlo vacío. ¿Les sobra plata en el papel? ¿Por qué creen que no la ven?</p>
+      <div class="botones"><button type="button" data-ejemplo="presupuesto">Cargar el ejemplo</button><button type="button" class="sec" data-borrar="presupuesto">Borrar todo</button></div>
+    </div>
+
+    <form class="bloque" autocomplete="off" onsubmit="return false">
+      <div class="grupo-titulo">Ingresos por mes (en mano)</div>
+      <div class="grilla">
+        <div class="campo"><label for="p-i1">Ingreso de la persona 1</label><div class="pesos"><input type="text" id="p-i1" name="ing1" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-i2">Ingreso de la persona 2</label><div class="pesos"><input type="text" id="p-i2" name="ing2" data-tipo="pesos" inputmode="numeric"></div></div>
+      </div>
+      <div class="campo"><label for="p-i3">Otros ingresos</label><div class="pesos"><input type="text" id="p-i3" name="ing3" data-tipo="pesos" inputmode="numeric"></div><span class="ayuda">Changas, alquileres que cobran, cuota alimentaria, etc.</span></div>
+
+      <div class="grupo-titulo">Necesidades</div>
+      <div class="grilla" data-grupo="necesidades">
+        <div class="campo"><label for="p-viv">Alquiler / hipoteca y expensas</label><div class="pesos"><input type="text" id="p-viv" name="vivienda" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-serv">Servicios (luz, gas, agua, internet, celular)</label><div class="pesos"><input type="text" id="p-serv" name="servicios" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-super">Supermercado y almacén</label><div class="pesos"><input type="text" id="p-super" name="super" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-trans">Transporte (SUBE, nafta, auto)</label><div class="pesos"><input type="text" id="p-trans" name="transporte" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-salud">Salud (prepaga, remedios)</label><div class="pesos"><input type="text" id="p-salud" name="salud" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-edu">Educación e hijos</label><div class="pesos"><input type="text" id="p-edu" name="educacion" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-seg">Seguros</label><div class="pesos"><input type="text" id="p-seg" name="seguros" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-imp">Impuestos (ABL, patente, monotributo)</label><div class="pesos"><input type="text" id="p-imp" name="impuestos" data-tipo="pesos" inputmode="numeric"></div></div>
+      </div>
+
+      <div class="grupo-titulo">Gustos</div>
+      <div class="grilla" data-grupo="gustos">
+        <div class="campo"><label for="p-sal">Salidas, restaurantes y delivery</label><div class="pesos"><input type="text" id="p-sal" name="salidas" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-subs">Suscripciones (streaming, gimnasio, apps)</label><div class="pesos"><input type="text" id="p-subs" name="suscripciones" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-ropa">Ropa y calzado</label><div class="pesos"><input type="text" id="p-ropa" name="ropa" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-viajes">Viajes y recreación</label><div class="pesos"><input type="text" id="p-viajes" name="viajes" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-reg">Regalos y donaciones</label><div class="pesos"><input type="text" id="p-reg" name="regalos" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-otros">Otros gastos</label><div class="pesos"><input type="text" id="p-otros" name="otros" data-tipo="pesos" inputmode="numeric"></div></div>
+      </div>
+
+      <div class="grupo-titulo">Ahorro y deudas</div>
+      <div class="grilla" data-grupo="ahorro">
+        <div class="campo"><label for="p-cuotas">Cuotas de tarjetas y préstamos</label><div class="pesos"><input type="text" id="p-cuotas" name="cuotas" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label for="p-ahorro">Ahorro e inversión</label><div class="pesos"><input type="text" id="p-ahorro" name="ahorro" data-tipo="pesos" inputmode="numeric"></div></div>
+      </div>
+    </form>
+
+    <div class="bloque resultado" aria-live="polite"></div>
+  </section>
+
+  <!-- ========== 4. RECORTES ========== -->
+  <section class="calc" id="recortes">
+    <a class="volver" href="#">← Ver todos los ejercicios</a><br>
+    <span class="tag">Ejercicio 4</span>
+    <h2>¿Hace diferencia gastar un poco menos?</h2>
+
+    <div class="bloque">
+      <h3>¿Qué hace esta calculadora?</h3>
+      <p>Muestra cuánto pueden juntar si dejan de gastar un poco en algunas cosas del día a día y <b>ahorran esa plata todos los meses</b>. Los gastos chicos ("gastos hormiga") parecen poco, pero sumados durante años hacen mucha diferencia.</p>
+      <p>Los resultados están en <b>pesos de hoy</b>, sin contar la inflación, así es fácil imaginar qué podrían hacer con esa plata.</p>
+    </div>
+
+    <div class="bloque ejemplo">
+      <h3>Para practicar: el caso de Nico y Vale</h3>
+      <p>Nico y Vale piden delivery dos veces por semana (unos $200.000 por mes), pagan 4 plataformas de streaming y compran café todos los días camino al trabajo.</p>
+      <p>Deciden: pedir delivery la mitad de veces (<b>$100.000 menos</b> por mes), quedarse con 2 plataformas (<b>$20.000 menos</b>) y llevar el café de casa (<b>$60.000 menos</b>). Van a invertir esa plata con un rendimiento de <b>3% anual por encima de la inflación</b>. ¿Cuánto juntarían en <b>5 años</b>?</p>
+      <p><b>Cómo completarlo:</b> en cada fila escriban <b>cuánto dejarían de gastar por mes</b> (no lo que gastan hoy). Después elijan la cantidad de años y el rendimiento.</p>
+      <div class="botones"><button type="button" data-ejemplo="recortes">Cargar el ejemplo</button><button type="button" class="sec" data-borrar="recortes">Borrar todo</button></div>
+    </div>
+
+    <form class="bloque" autocomplete="off" onsubmit="return false">
+      <div class="grupo-titulo">¿Qué pueden reducir y cuánto ahorrarían por mes?</div>
+      <div class="lista-recortes"></div>
+      <button type="button" class="sec agregar-recorte">+ Agregar otro gasto</button>
+
+      <div class="grupo-titulo">Supuestos</div>
+      <div class="grilla">
+        <div class="campo"><label for="r-anios">¿Durante cuántos años?</label><input type="text" id="r-anios" name="anios" data-tipo="numero" inputmode="numeric" placeholder="5"><span class="ayuda">Entre 1 y 30.</span></div>
+        <div class="campo"><label for="r-rend">Rendimiento anual por encima de la inflación</label><div class="pct"><input type="text" id="r-rend" name="rend" data-tipo="numero" inputmode="decimal" placeholder="0"></div><span class="ayuda">Si lo guardan "en el colchón", pongan 0.</span></div>
+      </div>
+    </form>
+
+    <div class="bloque resultado" aria-live="polite"></div>
+  </section>
+
+  <!-- ========== 5. TARJETA ========== -->
+  <section class="calc" id="tarjeta">
+    <a class="volver" href="#">← Ver todos los ejercicios</a><br>
+    <span class="tag">Ejercicio 5</span>
+    <h2>¿Cuánto tardamos en pagar la tarjeta?</h2>
+
+    <div class="bloque">
+      <h3>¿Qué hace esta calculadora?</h3>
+      <p>Compara dos caminos para cancelar la deuda de la tarjeta: <b>pagar solo el mínimo</b> todos los meses, o <b>pagar el mínimo más un extra</b>. Les muestra cuánto tardan y cuánto pagan de intereses en cada caso.</p>
+      <p>El <b>pago mínimo</b> que figura en el resumen cubre casi solo los intereses del mes y una parte muy chica de la deuda. Por eso pagar solo el mínimo hace que la deuda dure años.</p>
+    </div>
+
+    <div class="bloque ejemplo">
+      <h3>Para practicar: el caso de Ana y Diego</h3>
+      <p>Ana y Diego deben <b>$1.500.000</b> en la tarjeta. En el resumen figura una <b>TNA de 80%</b>. El banco calcula el pago mínimo como los intereses del mes más el <b>3% de la deuda</b>, y nunca menos de <b>$15.000</b>. Hasta ahora pagaban solo el mínimo.</p>
+      <p>¿Qué pasa si, además del mínimo, pagan <b>$50.000 más por mes</b>?</p>
+      <p><b>Cómo completarlo:</b> copien del resumen la deuda total y la TNA. Si no saben cómo calcula el mínimo su banco, dejen 3% y $15.000. Por último, escriban el extra que podrían sumar por mes.</p>
+      <div class="botones"><button type="button" data-ejemplo="tarjeta">Cargar el ejemplo</button><button type="button" class="sec" data-borrar="tarjeta">Borrar todo</button></div>
+    </div>
+
+    <form class="bloque" autocomplete="off" onsubmit="return false">
+      <div class="grilla">
+        <div class="campo"><label for="t-saldo">¿Cuánto deben en la tarjeta?</label><div class="pesos"><input type="text" id="t-saldo" name="saldo" data-tipo="pesos" inputmode="numeric"></div><span class="ayuda">El "saldo actual" del resumen.</span></div>
+        <div class="campo"><label for="t-tna">Tasa anual (TNA)</label><div class="pct"><input type="text" id="t-tna" name="tna" data-tipo="numero" inputmode="decimal"></div><span class="ayuda">Figura en el resumen como "TNA".</span></div>
+        <div class="campo"><label for="t-pct">El mínimo incluye este % de la deuda</label><div class="pct"><input type="text" id="t-pct" name="pct" data-tipo="numero" inputmode="decimal" placeholder="3"></div><span class="ayuda">Además de los intereses del mes.</span></div>
+        <div class="campo"><label for="t-piso">Pago mínimo nunca menor a</label><div class="pesos"><input type="text" id="t-piso" name="piso" data-tipo="pesos" inputmode="numeric" placeholder="15.000"></div></div>
+      </div>
+      <div class="campo"><label for="t-extra">¿Cuánto más que el mínimo pueden pagar por mes?</label><div class="pesos"><input type="text" id="t-extra" name="extra" data-tipo="pesos" inputmode="numeric"></div></div>
+      <label class="check"><input type="checkbox" name="iva" checked> <span>Sumar el IVA (21%) que se cobra sobre los intereses</span></label>
+      <p class="ayuda" style="margin-top:10px">Suponemos que mientras la pagan no hacen compras nuevas con la tarjeta.</p>
+    </form>
+
+    <div class="bloque resultado" aria-live="polite"></div>
+  </section>
+
+  <footer>Simuladores con fines educativos. Los resultados son aproximados y no son asesoramiento financiero.</footer>
+</main>
+
+<script>
+(() => {
+  // ---------- Utilidades ----------
+  const $ = (sel, el = document) => el.querySelector(sel);
+  const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
+  const pesos = n => '$ ' + Math.round(n).toLocaleString('es-AR');
+  const pct = n => (Math.round(n * 10) / 10).toLocaleString('es-AR') + '%';
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const HOY = new Date();
+  const TOPE_MESES = 600; // 50 años: si no termina antes, la deuda no baja
+
+  // Lee un input: los de pesos ignoran los puntos de miles; los numéricos aceptan coma decimal
+  function leer(el) {
+    if (!el) return 0;
+    const v = el.dataset.tipo === 'pesos' ? el.value.replace(/\D/g, '') : el.value.replace(',', '.');
+    const n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+  }
+  const campo = (form, name) => leer(form.elements[name]);
+
+  function formatearPesos(el) {
+    const digitos = el.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+    el.value = digitos ? Number(digitos).toLocaleString('es-AR') : '';
+  }
+  document.addEventListener('input', e => {
+    if (e.target.dataset && e.target.dataset.tipo === 'pesos') formatearPesos(e.target);
+  });
+
+  function escribir(form, name, valor) {
+    const el = form.elements[name];
+    if (!el) return;
+    if (el.type === 'checkbox') { el.checked = !!valor; return; }
+    if (el.dataset && el.dataset.tipo === 'pesos') { el.value = valor ? Number(valor).toLocaleString('es-AR') : ''; return; }
+    el.value = typeof valor === 'number' && el.tagName !== 'SELECT' ? String(valor).replace('.', ',') : valor;
+  }
+
+  // "1 año y 3 meses"
+  function plazo(m) {
+    const a = Math.floor(m / 12), r = m % 12;
+    const partes = [];
+    if (a) partes.push(a + (a === 1 ? ' año' : ' años'));
+    if (r) partes.push(r + (r === 1 ? ' mes' : ' meses'));
+    return partes.join(' y ') || '0 meses';
+  }
+  // Fecha del mes número m contado desde el mes que viene
+  function fecha(m) {
+    const d = new Date(HOY.getFullYear(), HOY.getMonth() + m, 1);
+    return MESES[d.getMonth()] + ' de ' + d.getFullYear();
+  }
+  const dato = (t, v) => `<div class="dato"><span>${t}</span><b>${v}</b></div>`;
+
+  // ---------- Navegación por #ancla (cada QR apunta a una) ----------
+  function mostrar() {
+    const id = location.hash.slice(1);
+    const sec = id && document.getElementById(id);
+    const esCalc = sec && sec.classList.contains('calc');
+    $$('.calc').forEach(s => s.classList.toggle('activa', s === sec));
+    document.body.classList.toggle('con-calc', !!esCalc);
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', mostrar);
+
+  // =====================================================================
+  // 1. DEUDAS
+  // =====================================================================
+  const secDeudas = $('#deudas');
+  const formDeudas = $('form', secDeudas);
+  const listaDeudas = $('.lista-deudas', secDeudas);
+
+  // Selector de mes para el pago único: los próximos 12 meses
+  const selMes = $('#d-mes');
+  for (let k = 1; k <= 12; k++) {
+    const d = new Date(HOY.getFullYear(), HOY.getMonth() + k, 1);
+    selMes.add(new Option(MESES[d.getMonth()] + ' ' + d.getFullYear(), k));
+  }
+
+  function filaDeuda(d = {}) {
+    const div = document.createElement('div');
+    div.className = 'deuda';
+    div.innerHTML = `
+      <div class="deuda-cab"><span class="num"></span><button type="button" class="chico quitar">Quitar</button></div>
+      <div class="campo"><label>¿Qué deuda es?</label><input type="text" class="nombre" placeholder="Ej: tarjeta, préstamo, cuotas del auto"></div>
+      <div class="grilla">
+        <div class="campo"><label>¿Cuánto deben hoy?</label><div class="pesos"><input type="text" class="saldo" data-tipo="pesos" inputmode="numeric"></div></div>
+        <div class="campo"><label>Cuota mensual</label><div class="pesos"><input type="text" class="cuota" data-tipo="pesos" inputmode="numeric"></div></div>
+      </div>
+      <div class="campo"><label>Tasa anual (TNA)</label><div class="pct"><input type="text" class="tasa" data-tipo="numero" inputmode="decimal"></div>
+        <span class="ayuda">Figura en el resumen o el contrato. Si es en cuotas sin interés, pongan 0.</span></div>`;
+    $('.nombre', div).value = d.nombre || '';
+    $('.saldo', div).value = d.saldo ? Number(d.saldo).toLocaleString('es-AR') : '';
+    $('.cuota', div).value = d.cuota ? Number(d.cuota).toLocaleString('es-AR') : '';
+    $('.tasa', div).value = d.tasa != null ? String(d.tasa).replace('.', ',') : '';
+    listaDeudas.appendChild(div);
+    numerarDeudas();
+  }
+  function numerarDeudas() {
+    $$('.deuda', listaDeudas).forEach((d, i) => { $('.num', d).textContent = 'Deuda ' + (i + 1); });
+  }
+  listaDeudas.addEventListener('click', e => {
+    if (!e.target.classList.contains('quitar')) return;
+    e.target.closest('.deuda').remove();
+    if (!$('.deuda', listaDeudas)) filaDeuda();
+    numerarDeudas();
+    calcDeudas();
+  });
+  $('.agregar-deuda', secDeudas).addEventListener('click', () => { filaDeuda(); });
+
+  // Simula mes a mes. Con "enCascada", lo que sobra después de las cuotas va a la deuda prioritaria.
+  function simularDeudas(deudas, { extra = 0, unico = 0, mesUnico = 0, orden = 'saldo', enCascada = true }) {
+    const ds = deudas.map(d => ({ ...d, resta: d.saldo, saldadaEn: null }));
+    const prioridad = [...ds].sort(orden === 'tasa'
+      ? (a, b) => b.tasa - a.tasa || a.saldo - b.saldo
+      : (a, b) => a.saldo - b.saldo || b.tasa - a.tasa);
+    const presupuesto = ds.reduce((s, d) => s + d.cuota, 0) + extra;
+    let m = 0, intereses = 0;
+    while (ds.some(d => d.resta > 0) && m < TOPE_MESES) {
+      m++;
+      for (const d of ds) if (d.resta > 0) { const i = d.resta * d.tasa / 1200; d.resta += i; intereses += i; }
+      let disponible = presupuesto + (m === mesUnico ? unico : 0);
+      for (const d of ds) if (d.resta > 0) { const p = Math.min(d.cuota, d.resta, disponible); d.resta -= p; disponible -= p; }
+      if (enCascada) for (const d of prioridad) {
+        if (disponible <= 0) break;
+        if (d.resta > 0) { const p = Math.min(d.resta, disponible); d.resta -= p; disponible -= p; }
+      }
+      for (const d of ds) if (d.resta < 1 && d.saldadaEn === null) { d.resta = 0; d.saldadaEn = m; }
+    }
+    return { meses: m, intereses, deudas: ds, termina: ds.every(d => d.saldadaEn !== null) };
+  }
+
+  function calcDeudas() {
+    const res = $('.resultado', secDeudas);
+    const deudas = $$('.deuda', listaDeudas).map((div, i) => ({
+      nombre: $('.nombre', div).value.trim() || 'Deuda ' + (i + 1),
+      saldo: leer($('.saldo', div)), cuota: leer($('.cuota', div)), tasa: leer($('.tasa', div)),
+    })).filter(d => d.saldo > 0);
+
+    if (!deudas.length) { res.innerHTML = '<h3>Resultado</h3><p class="vacio">Carguen al menos una deuda con lo que deben hoy para ver el plan.</p>'; return; }
+
+    const opts = {
+      extra: campo(formDeudas, 'extra'), unico: campo(formDeudas, 'unico'),
+      mesUnico: Number(formDeudas.elements.mesUnico.value), orden: formDeudas.elements.orden.value,
+    };
+    const plan = simularDeudas(deudas, opts);
+    const otro = simularDeudas(deudas, { ...opts, orden: opts.orden === 'tasa' ? 'saldo' : 'tasa' });
+    const base = simularDeudas(deudas, { enCascada: false });
+
+    if (!plan.termina) {
+      res.innerHTML = `<h3>Resultado</h3><div class="alerta">Con estos pagos las deudas no terminan de bajar: lo que pagan por mes no alcanza a cubrir los intereses. Prueben sumar más plata extra por mes.</div>`;
+      return;
+    }
+
+    const orden = [...plan.deudas].sort((a, b) => a.saldadaEn - b.saldadaEn)
+      .map(d => `<li><b>${esc(d.nombre)}</b>: cancelada en ${fecha(d.saldadaEn)} (mes ${d.saldadaEn})</li>`).join('');
+    const nombreOtro = opts.orden === 'tasa' ? 'empezando por la más chica' : 'empezando por la de tasa más alta';
+
+    let comparacion;
+    if (base.termina) {
+      const ahorroInt = base.intereses - plan.intereses, ahorroMes = base.meses - plan.meses;
+      comparacion = `<p style="margin-top:12px">Si solo pagaran las cuotas de siempre, sin extra y sin plan, tardarían <b>${plazo(base.meses)}</b> y pagarían <b>${pesos(base.intereses)}</b> de intereses.</p>`
+        + (ahorroInt > 0 || ahorroMes > 0 ? `<p>Con el plan <b>terminan ${plazo(Math.max(0, ahorroMes))} antes</b> y se ahorran <b>${pesos(Math.max(0, ahorroInt))}</b> en intereses.</p>` : '');
+    } else {
+      comparacion = `<p style="margin-top:12px">Si solo pagaran las cuotas de siempre, sin plan, <b>alguna deuda no terminaría nunca</b>: su cuota no alcanza a cubrir los intereses.</p>`;
+    }
+
+    res.innerHTML = `
+      <h3>Resultado</h3>
+      <p>Quedan libres de deudas en</p>
+      <div class="grande">${plazo(plan.meses)}</div>
+      <p>Es decir, en <b>${fecha(plan.meses)}</b>, pagando en total <b>${pesos(plan.intereses)}</b> de intereses.</p>
+      <p style="margin-top:12px"><b>Orden en que se cancelan:</b></p>
+      <ol class="orden">${orden}</ol>
+      ${comparacion}
+      <p>Con el otro método (${nombreOtro}) tardarían <b>${plazo(otro.meses)}</b> y pagarían <b>${pesos(otro.intereses)}</b> de intereses.</p>
+      <p class="nota">Cálculo aproximado: supone que las tasas y las cuotas no cambian y que no toman deudas nuevas.</p>`;
+  }
+
+  // =====================================================================
+  // 2. FONDO DE EMERGENCIA
+  // =====================================================================
+  const secEmerg = $('#emergencias');
+  const formEmerg = $('form', secEmerg);
+  const GASTOS_EMERG = ['vivienda', 'servicios', 'super', 'transporte', 'salud', 'cuotas', 'educacion', 'otros'];
+
+  function calcEmerg() {
+    const res = $('.resultado', secEmerg);
+    const gastos = GASTOS_EMERG.reduce((s, n) => s + campo(formEmerg, n), 0);
+    if (!gastos) { res.innerHTML = '<h3>Resultado</h3><p class="vacio">Carguen sus gastos imprescindibles para ver cuánto debería tener el fondo.</p>'; return; }
+
+    const meses = Number(formEmerg.elements.cobertura.value);
+    const n = Math.max(1, Math.round(campo(formEmerg, 'plazo')) || 12);
+    const ahorro = campo(formEmerg, 'ahorro');
+    const ingresos = campo(formEmerg, 'ingresos');
+    const i = Math.pow(1 + campo(formEmerg, 'rend') / 100, 1 / 12) - 1;
+    const meta = gastos * meses;
+
+    let detalle;
+    if (ahorro >= meta) {
+      detalle = `<p><b>¡Ya lo tienen!</b> Lo que tienen guardado (${pesos(ahorro)}) alcanza para cubrir ${meses} meses de gastos.</p>`;
+    } else {
+      const crece = Math.pow(1 + i, n);
+      const falta = meta - ahorro * crece;
+      const mensual = i > 0 ? falta * i / (crece - 1) : falta / n;
+      detalle = `
+        ${dato('Gastos imprescindibles por mes', pesos(gastos))}
+        ${dato('Meta del fondo (' + meses + ' meses)', pesos(meta))}
+        ${dato('Ya tienen', pesos(ahorro))}
+        ${dato('Les falta', pesos(meta - ahorro))}
+        <p style="margin-top:12px">Para completarlo en <b>${plazo(n)}</b> tienen que ahorrar</p>
+        <div class="grande">${pesos(mensual)} por mes</div>
+        ${ingresos ? `<p>Eso es el <b>${pct(mensual / ingresos * 100)}</b> de lo que ganan entre los dos.` + (mensual / ingresos > 0.3 ? ' Es bastante: prueben con un plazo más largo.' : '') + '</p>' : ''}`;
+    }
+    res.innerHTML = `<h3>Resultado</h3>
+      ${ahorro >= meta ? '' : '<p>Su fondo de emergencia debería tener</p><div class="grande">' + pesos(meta) + '</div>'}
+      ${detalle}
+      <p class="nota">Montos en pesos de hoy. Conviene revisarlo cada tanto: si suben los gastos, sube la meta. Guárdenlo en algo que puedan retirar rápido (cuenta remunerada, fondo money market, plazo fijo corto).</p>`;
+  }
+
+  // =====================================================================
+  // 3. PRESUPUESTO
+  // =====================================================================
+  const secPres = $('#presupuesto');
+  const formPres = $('form', secPres);
+  const GRUPOS = [
+    { id: 'necesidades', nombre: 'Necesidades', ref: 50 },
+    { id: 'gustos', nombre: 'Gustos', ref: 30 },
+    { id: 'ahorro', nombre: 'Ahorro y deudas', ref: 20 },
+  ];
+
+  function calcPres() {
+    const res = $('.resultado', secPres);
+    const ingresos = campo(formPres, 'ing1') + campo(formPres, 'ing2') + campo(formPres, 'ing3');
+    const items = [];
+    const porGrupo = GRUPOS.map(g => {
+      let total = 0;
+      $$(`[data-grupo="${g.id}"] input`, formPres).forEach(el => {
+        const v = leer(el);
+        if (v > 0) { total += v; items.push({ nombre: $(`label[for="${el.id}"]`, formPres).textContent, v }); }
+      });
+      return { ...g, total };
+    });
+    const gastos = items.reduce((s, it) => s + it.v, 0);
+
+    if (!ingresos && !gastos) { res.innerHTML = '<h3>Resultado</h3><p class="vacio">Carguen sus ingresos y gastos para ver el resumen.</p>'; return; }
+
+    const saldo = ingresos - gastos;
+    const base = ingresos || gastos;
+    const tablaGrupos = porGrupo.map(g =>
+      `<tr><td>${g.nombre}</td><td>${pesos(g.total)}</td><td>${pct(g.total / base * 100)}</td><td>${g.ref}%</td></tr>`).join('');
+    const top = items.sort((a, b) => b.v - a.v).slice(0, 3)
+      .map(it => `<li><b>${esc(it.nombre)}</b>: ${pesos(it.v)} (${pct(it.v / base * 100)})</li>`).join('');
+
+    let mensaje;
+    if (!ingresos) mensaje = '<p>Carguen también los ingresos para saber si les sobra o les falta.</p>';
+    else if (saldo > 0) mensaje = `<p>Les sobran</p><div class="grande">${pesos(saldo)} por mes</div><p>Es el ${pct(saldo / ingresos * 100)} de lo que ganan. Si a fin de mes no lo ven, hay gastos que no están anotando: vale la pena revisar los movimientos de la tarjeta y la billetera virtual.</p>`;
+    else if (saldo < 0) mensaje = `<div class="alerta">Gastan <b>${pesos(-saldo)}</b> más de lo que ganan por mes. Esa diferencia se suele cubrir con tarjeta o préstamos, y la deuda crece.</div>`;
+    else mensaje = '<p>Gastan exactamente lo que ganan: no queda margen para imprevistos.</p>';
+
+    res.innerHTML = `<h3>Resultado</h3>
+      ${dato('Ingresos', pesos(ingresos))}
+      ${dato('Gastos', pesos(gastos))}
+      <div style="margin-top:12px">${mensaje}</div>
+      <p style="margin-top:12px"><b>Comparado con la regla 50/30/20</b> (sobre ${ingresos ? 'sus ingresos' : 'sus gastos'}):</p>
+      <table><thead><tr><th></th><th>Monto</th><th>Ustedes</th><th>Referencia</th></tr></thead><tbody>${tablaGrupos}</tbody></table>
+      ${top ? `<p style="margin-top:12px"><b>Lo que más se lleva su plata:</b></p><ol class="orden">${top}</ol>` : ''}
+      <p class="nota">Para pensar juntos: ¿hay algo en "Gustos" que no disfruten tanto como lo que cuesta?</p>`;
+  }
+
+  // =====================================================================
+  // 4. RECORTES
+  // =====================================================================
+  const secRec = $('#recortes');
+  const formRec = $('form', secRec);
+  const listaRec = $('.lista-recortes', secRec);
+
+  function filaRecorte(nombre = '', monto = 0) {
+    const div = document.createElement('div');
+    div.className = 'fila-recorte';
+    div.innerHTML = `
+      <input type="text" class="nombre" aria-label="Gasto" placeholder="Ej: delivery">
+      <div class="pesos"><input type="text" class="monto" data-tipo="pesos" inputmode="numeric" aria-label="Cuánto ahorran por mes" placeholder="0"></div>
+      <button type="button" class="chico quitar" aria-label="Quitar">✕</button>`;
+    $('.nombre', div).value = nombre;
+    $('.monto', div).value = monto ? Number(monto).toLocaleString('es-AR') : '';
+    listaRec.appendChild(div);
+  }
+  const RECORTES_INICIALES = ['Delivery y comida afuera', 'Suscripciones que casi no usan', 'Café y snacks del día a día', 'Compras por impulso'];
+  listaRec.addEventListener('click', e => {
+    if (!e.target.classList.contains('quitar')) return;
+    e.target.closest('.fila-recorte').remove();
+    if (!$('.fila-recorte', listaRec)) filaRecorte();
+    calcRec();
+  });
+  $('.agregar-recorte', secRec).addEventListener('click', () => filaRecorte());
+
+  function calcRec() {
+    const res = $('.resultado', secRec);
+    const mensual = $$('.monto', listaRec).reduce((s, el) => s + leer(el), 0);
+    if (!mensual) { res.innerHTML = '<h3>Resultado</h3><p class="vacio">Escriban cuánto dejarían de gastar por mes en al menos una fila.</p>'; return; }
+
+    const anios = Math.min(30, Math.max(1, Math.round(campo(formRec, 'anios')) || 5));
+    const i = Math.pow(1 + campo(formRec, 'rend') / 100, 1 / 12) - 1;
+    const acumulado = meses => i > 0 ? mensual * (Math.pow(1 + i, meses) - 1) / i : mensual * meses;
+
+    const filas = [];
+    for (let a = 1; a <= anios; a++) filas.push(`<tr><td>Año ${a}</td><td>${pesos(mensual * 12 * a)}</td><td>${pesos(acumulado(12 * a))}</td></tr>`);
+    const total = acumulado(12 * anios), aportado = mensual * 12 * anios;
+
+    res.innerHTML = `<h3>Resultado</h3>
+      ${dato('Ahorran por mes', pesos(mensual))}
+      ${dato('Ahorran por año', pesos(mensual * 12))}
+      <p style="margin-top:12px">En ${anios} ${anios === 1 ? 'año' : 'años'} juntarían</p>
+      <div class="grande">${pesos(total)}</div>
+      <p>De eso, ${pesos(aportado)} es lo que dejaron de gastar` + (total - aportado >= 1 ? ` y <b>${pesos(total - aportado)}</b> lo que generó el rendimiento.` : '.') + `</p>
+      <table><thead><tr><th></th><th>Lo que pusieron</th><th>Lo que tienen</th></tr></thead><tbody>${filas.join('')}</tbody></table>
+      <p class="nota">Montos en pesos de hoy. Para pensar juntos: ¿qué harían con esa plata?</p>`;
+  }
+
+  // =====================================================================
+  // 5. TARJETA
+  // =====================================================================
+  const secTar = $('#tarjeta');
+  const formTar = $('form', secTar);
+
+  // Mes a mes: intereses (+IVA), pago mínimo = intereses + IVA + % de la deuda (con piso), más el extra
+  function simularTarjeta({ saldo, tna, pctMin, piso, extra, iva }) {
+    let resta = saldo, m = 0, intereses = 0, primerPago = 0;
+    const porAnio = [];
+    while (resta > 0 && m < TOPE_MESES) {
+      m++;
+      const interes = resta * tna / 1200 * (iva ? 1.21 : 1);
+      const minimo = Math.max(interes + resta * pctMin / 100, piso);
+      const pago = Math.min(minimo + extra, resta + interes);
+      if (m === 1) primerPago = pago;
+      intereses += interes;
+      resta = resta + interes - pago;
+      if (resta < 1) resta = 0;
+      if (m % 12 === 0) porAnio.push(resta);
+    }
+    return { meses: m, intereses, total: saldo + intereses, primerPago, porAnio, termina: resta === 0 };
+  }
+
+  function calcTar() {
+    const res = $('.resultado', secTar);
+    const saldo = campo(formTar, 'saldo');
+    if (!saldo) { res.innerHTML = '<h3>Resultado</h3><p class="vacio">Carguen cuánto deben en la tarjeta y la tasa para comparar.</p>'; return; }
+
+    const p = {
+      saldo, tna: campo(formTar, 'tna'),
+      pctMin: formTar.elements.pct.value.trim() ? campo(formTar, 'pct') : 3,
+      piso: formTar.elements.piso.value.trim() ? campo(formTar, 'piso') : 15000,
+      iva: formTar.elements.iva.checked,
+    };
+    const extra = campo(formTar, 'extra');
+    const minimo = simularTarjeta({ ...p, extra: 0 });
+    const conExtra = simularTarjeta({ ...p, extra });
+
+    if (!minimo.termina) {
+      res.innerHTML = '<h3>Resultado</h3><div class="alerta">Con estos datos, pagando solo el mínimo la deuda no termina nunca. Revisen el porcentaje del mínimo: tiene que ser mayor a 0.</div>';
+      return;
+    }
+
+    const col = (titulo, r) => `<div><div class="t">${titulo}</div>
+      <div class="v">${plazo(r.meses)}</div>
+      <div class="t" style="margin-top:6px">Intereses${p.iva ? ' + IVA' : ''}</div><div class="v">${pesos(r.intereses)}</div>
+      <div class="t" style="margin-top:6px">Total pagado</div><div class="v">${pesos(r.total)}</div>
+      <div class="t" style="margin-top:6px">Primer pago</div><div class="v">${pesos(r.primerPago)}</div></div>`;
+
+    let texto;
+    if (extra > 0) {
+      texto = `<p>Pagando <b>${pesos(extra)} más por mes</b>, terminan <b>${plazo(minimo.meses - conExtra.meses)} antes</b> y se ahorran <b>${pesos(minimo.intereses - conExtra.intereses)}</b> en intereses.</p>`;
+    } else {
+      texto = `<p>Escriban un monto extra por mes para ver cuánto tiempo y plata se ahorran.</p>`;
+    }
+
+    const anios = Math.max(minimo.porAnio.length, conExtra.porAnio.length);
+    const filas = [];
+    for (let a = 0; a < Math.min(anios, 10); a++) {
+      filas.push(`<tr><td>Año ${a + 1}</td><td>${pesos(minimo.porAnio[a] ?? 0)}</td>${extra > 0 ? `<td>${pesos(conExtra.porAnio[a] ?? 0)}</td>` : ''}</tr>`);
+    }
+
+    res.innerHTML = `<h3>Resultado</h3>
+      <p>Pagando solo el mínimo tardarían</p>
+      <div class="grande">${plazo(minimo.meses)}</div>
+      <p>y pagarían <b>${pesos(minimo.intereses)}</b> de intereses: ${pct(minimo.intereses / saldo * 100)} de lo que deben hoy.</p>
+      ${texto}
+      ${extra > 0 ? `<div class="comparar">${col('Solo el mínimo', minimo)}${col('Mínimo + ' + pesos(extra), conExtra)}</div>` : ''}
+      ${filas.length ? `<p style="margin-top:12px"><b>Lo que les quedaría por pagar al final de cada año:</b></p>
+      <table><thead><tr><th></th><th>Solo mínimo</th>${extra > 0 ? '<th>Con extra</th>' : ''}</tr></thead><tbody>${filas.join('')}</tbody></table>` : ''}
+      <p class="nota">Cálculo aproximado: supone que la tasa no cambia y que no hacen compras nuevas. Cada banco calcula el mínimo de forma un poco distinta.</p>`;
+  }
+
+  // =====================================================================
+  // Ejemplos, borrar y recálculo
+  // =====================================================================
+  const CALCS = {
+    deudas: { form: formDeudas, calc: calcDeudas },
+    emergencias: { form: formEmerg, calc: calcEmerg },
+    presupuesto: { form: formPres, calc: calcPres },
+    recortes: { form: formRec, calc: calcRec },
+    tarjeta: { form: formTar, calc: calcTar },
+  };
+
+  // Mes del próximo diciembre (para el aguinaldo del ejemplo), contado desde el mes que viene
+  const mesesHastaDiciembre = ((11 - HOY.getMonth() + 12) % 12) || 12;
+
+  const EJEMPLOS = {
+    deudas() {
+      listaDeudas.innerHTML = '';
+      filaDeuda({ nombre: 'Tarjeta de crédito', saldo: 850000, cuota: 60000, tasa: 75 });
+      filaDeuda({ nombre: 'Préstamo personal', saldo: 1200000, cuota: 95000, tasa: 60 });
+      filaDeuda({ nombre: 'Heladera en cuotas', saldo: 360000, cuota: 30000, tasa: 0 });
+      escribir(formDeudas, 'extra', 40000);
+      escribir(formDeudas, 'unico', 300000);
+      formDeudas.elements.mesUnico.value = String(mesesHastaDiciembre);
+      formDeudas.elements.orden.value = 'saldo';
+    },
+    emergencias() {
+      const v = { vivienda: 550000, servicios: 120000, super: 480000, transporte: 150000, salud: 180000, cuotas: 90000, educacion: 0, otros: 0, ingresos: 2400000, ahorro: 400000, cobertura: '3', plazo: 12, rend: 0 };
+      for (const k in v) escribir(formEmerg, k, v[k]);
+    },
+    presupuesto() {
+      formPres.reset();
+      const v = { ing1: 1400000, ing2: 1100000, vivienda: 600000, servicios: 130000, super: 520000, transporte: 140000, salud: 200000, salidas: 250000, suscripciones: 60000, ropa: 120000, cuotas: 150000 };
+      for (const k in v) escribir(formPres, k, v[k]);
+    },
+    recortes() {
+      listaRec.innerHTML = '';
+      filaRecorte('Delivery (la mitad de veces)', 100000);
+      filaRecorte('Streaming (de 4 a 2 plataformas)', 20000);
+      filaRecorte('Café de casa', 60000);
+      escribir(formRec, 'anios', 5);
+      escribir(formRec, 'rend', 3);
+    },
+    tarjeta() {
+      const v = { saldo: 1500000, tna: 80, pct: 3, piso: 15000, extra: 50000, iva: true };
+      for (const k in v) escribir(formTar, k, v[k]);
+    },
+  };
+
+  function borrar(id) {
+    const { form } = CALCS[id];
+    form.reset();
+    if (id === 'deudas') { listaDeudas.innerHTML = ''; filaDeuda(); filaDeuda(); }
+    if (id === 'recortes') { listaRec.innerHTML = ''; RECORTES_INICIALES.forEach(n => filaRecorte(n)); }
+  }
+
+  document.addEventListener('click', e => {
+    const ej = e.target.dataset && e.target.dataset.ejemplo;
+    const bo = e.target.dataset && e.target.dataset.borrar;
+    const id = ej || bo;
+    if (!id) return;
+    if (ej) EJEMPLOS[id](); else borrar(id);
+    CALCS[id].calc();
+    if (ej) $('form', document.getElementById(id)).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  for (const id in CALCS) {
+    const { form, calc } = CALCS[id];
+    form.addEventListener('input', calc);
+    form.addEventListener('change', calc);
+    borrar(id);
+    calc();
+  }
+  mostrar();
+})();
+</script>
+</body>
+</html>
